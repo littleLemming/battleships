@@ -1,6 +1,5 @@
 from random import randint
 import sys
-from collections import Counter
 import math
 
 """
@@ -55,9 +54,41 @@ def setup_boards_auto():
         b2 += 1
         b3 -= 1
     print ('There will be the following ships:\n' + str(b5) + ' Carriers (5 fields long)\n' + str(b4) + ' Battleships (4 fields long)\n' + str(b3) + '  Cruisers (3 fields long)\n' + str(b2) + ' Destroyers (2 fields long)\n')
+    set_boats_ranomly(5,b5,board1,s)
+    set_boats_ranomly(4,b4,board1,s)
     print_board_owner(board1)
     print_board_owner(board2)
 
+def set_boats_ranomly(len_boat, amnt_boats, board, size_board):
+    for _ in range(amnt_boats):
+        set_boat = False
+        for _ in range(10):
+            row = randint(0,size_board-1)
+            column = randint(0,size_board-1)
+            direction = randint(0,3) # 0 means to the right, 1 means to the left, 2 means up, 3 means down
+            if (direction == 0 and row+len_boat < size_board) or (direction == 1 and row-len_boat >= 0) or (direction == 2 and column-len_boat >= 0) or (direction == 3 and column+len_boat < size_board):
+                print(str(row) + ' - ' + str(column) + ' - ' + str(direction))
+                setable = True
+                for j in range(len_boat,):
+                    if not ((direction == 0 and board[row+j][column] == 'O') or (direction == 1 and board[row-j][column] == 'O') or (direction == 2 and board[row][column-j] == 'O') or (direction == 3 and board[row][column+j] == 'O')):
+                        # TODO missing rule about not setting directly next to each other
+                        setable = False
+                        break
+                if setable:
+                    for j in range(len_boat,):
+                        if direction == 0:
+                            board[row+j][column] = 'V'
+                        if direction == 1:
+                            board[row-j][column] = 'V'
+                        if direction == 2:
+                            board[row][column-j] = 'V'
+                        if direction == 3:
+                            board[row][column+j] = 'V'
+                    set_boat = True 
+            if set_boat:
+                break         
+        if not set_boat:
+            bail_out("Within 10000 a ship could not be placed. Therefor the program gets terminated.")
 
 """
 this method lets the players set up their boars
