@@ -30,7 +30,7 @@ def setup_boards_auto():
     for i in range(s):
         board1.append(["O" for i in range(s)])
         board2.append(["O" for i in range(s)])
-    max_cross = math.ceil(s*s/3)
+    max_cross = math.ceil(s*s/4)
     print('The size of the longest ship will be: ' + str(max_len))
     b5, b4, b3 = 0, 0, 0
     if max_len >= 5:
@@ -47,46 +47,68 @@ def setup_boards_auto():
         b4 += 1
         b2 += 1
         b5 -= 1
+        b5 = max(b5,0)
     if b4 > b3:
         b3 += 1
         b4 -= 1
+        b4 = max(b4,0)
     if b3 > b2:
         b2 += 1
         b3 -= 1
+        b3 = max(b3,0)
     print ('There will be the following ships:\n' + str(b5) + ' Carriers (5 fields long)\n' + str(b4) + ' Battleships (4 fields long)\n' + str(b3) + '  Cruisers (3 fields long)\n' + str(b2) + ' Destroyers (2 fields long)\n')
     set_boats_ranomly(5,b5,board1,s)
     set_boats_ranomly(4,b4,board1,s)
+    set_boats_ranomly(3,b3,board1,s)
+    set_boats_ranomly(2,b2,board1,s)
     print_board_owner(board1)
+    set_boats_ranomly(5,b5,board2,s)
+    set_boats_ranomly(4,b4,board2,s)
+    set_boats_ranomly(3,b3,board2,s)
+    set_boats_ranomly(2,b2,board2,s)
     print_board_owner(board2)
 
 def set_boats_ranomly(len_boat, amnt_boats, board, size_board):
     for _ in range(amnt_boats):
         set_boat = False
-        for _ in range(10):
+        while not set_boat:
             row = randint(0,size_board-1)
             column = randint(0,size_board-1)
-            direction = randint(0,3) # 0 means to the right, 1 means to the left, 2 means up, 3 means down
-            if (direction == 0 and row+len_boat < size_board) or (direction == 1 and row-len_boat >= 0) or (direction == 2 and column-len_boat >= 0) or (direction == 3 and column+len_boat < size_board):
-                print(str(row) + ' - ' + str(column) + ' - ' + str(direction))
+            direction = randint(0,1) # 0 means to the right, 1 means to the down
+            if (direction == 0 and column+len_boat <= size_board) or (direction == 1 and row+len_boat <= size_board):
+                # print (str(row) + ' - ' + str(column) + ' - ' + str(direction))
                 setable = True
-                for j in range(len_boat,):
-                    if not ((direction == 0 and board[row+j][column] == 'O') or (direction == 1 and board[row-j][column] == 'O') or (direction == 2 and board[row][column-j] == 'O') or (direction == 3 and board[row][column+j] == 'O')):
-                        # TODO missing rule about not setting directly next to each other
+                for j in range(len_boat):
+                    ### TO TEST
+                    if j == 0:
+                        if direction == 0 and (column-1 >= 0 and board[row][column-1] != 'O'):
+                            setable = False
+                            break
+                        if direction == 1 and (row-1 >= 0 and board[row-1][column] != 'O'):
+                            setable = False
+                            break
+                    if j == len_boat-1:
+                        if direction == 0 and (column+j+1 < size_board and board[row][column+j+1] != 'O'):
+                            setable = False
+                            break
+                        if direction == 1 and (row+j+1 < size_board and board[row+j+1][column] != 'O'):
+                            setable = False
+                            break
+                    if direction == 0 and (board[row][column+j] != 'O' or (row-1 >= 0 and board[row-1][column+j] != 'O') or (row+1 < size_board and board[row][column+j] != 'O')):
+                        setable = False
+                        break
+                    if direction == 1 and (board[row+j][column] != 'O' or (column-1 >= 0 and board[row+j][column-1] != 'O') or (column+1 < size_board and board[row+j][column+1] != 'O')):
                         setable = False
                         break
                 if setable:
                     for j in range(len_boat,):
                         if direction == 0:
-                            board[row+j][column] = 'V'
-                        if direction == 1:
-                            board[row-j][column] = 'V'
-                        if direction == 2:
-                            board[row][column-j] = 'V'
-                        if direction == 3:
                             board[row][column+j] = 'V'
+                        if direction == 1:
+                            board[row+j][column] = 'V'
                     set_boat = True 
-            if set_boat:
-                break         
+                if set_boat:
+                    break         
         if not set_boat:
             bail_out("Within 10000 a ship could not be placed. Therefor the program gets terminated.")
 
@@ -114,6 +136,19 @@ def print_board_owner(board):
 
 def print_board_opponent():
     print("NOT YET IMPLEMENTED")
+
+len_boat = 3 
+amnt_boats = 1 
+board = [['O','O','O','V','O'],['O','V','O','O','O'],['O','V','O','O','O'],['O','O','O','O','O'],['O','O','O','O','O']]
+
+#OOOVO
+#OVOOO
+#OVOOO
+#OOOOO
+#OOOOO 22:20 - 
+
+size_board = 5
+
 
 
 setup_boards_auto()
